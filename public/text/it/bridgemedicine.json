@@ -1,0 +1,12 @@
+{
+    "name": "Bridge Medicine",
+    "quote": "IT Whatever you do, if you do it sincerely, will eventually become a bridge to your wholeness, a good ship that carries you through the darkness...",
+    "quoteauthor": "Carl Jung (1875-1961)",
+    "image": "bridgemedicine.png",
+    "holons" : 
+    [
+    { "id": "beforethebridge", "image": "beforethebridge" },
+    { "id": "onthebridge", "image": "onthebridge" },
+    { "id": "afterthebridge", "image": "afterthebridge" }
+    ]
+}

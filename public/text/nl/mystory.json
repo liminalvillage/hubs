@@ -1,0 +1,11 @@
+{
+    "name": "Mijn verhaal",
+    "quote": "If the path before you is clear, you’re probably on someone else’s.",
+    "quoteauthor": "Joseph Campbell",
+    "holons" : 
+    [
+    { "id": "myancestors"},
+    { "id": "thedoctor" },
+    { "id": "becamethepatient"}
+    ]
+}
