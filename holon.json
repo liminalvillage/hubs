@@ -1,1 +1,16 @@
+{
+    "version": "0.1",
+    "name": "Hubs Network",
+    "quote": "You never change things by fighting the existing reality.\nTo change something, build a new model that makes the existing model obsolete.",
+    "quoteauthor": "Buckminster Fuller",
+    "image": "hubs.png",
+    "holons" : 
+    [
+    { "id": "http://github.com/liminalvilage/local/","label":"Synergy hubs"},
+    { "id": "http://github.com/liminalvilage/local/","label":"Ratpark"},
+    { "id": "http://github.com/liminalvilage/local/","label":"Liminal Village"},
+    { "id": "http://github.com/liminalvilage/local/","label":"Asha Global"},
+    { "id": "http://github.com/liminalvilage/local/","label":"Akasha hub"}
+    ]
+}
 
