@@ -9,7 +9,6 @@
 // const router = new Router()
 export default {
   components: {
-    home: () => import('./views/home'),
     holon: () => import('./views/holon'),
     settings: () => import('./views/settings')
   },
@@ -22,7 +21,7 @@ export default {
       },
       debug: true
     })
-    this.$zircle.toView('home')
+    this.$zircle.toView('holon')
     //
     //   to: 'holon',
     //   params: { id: 'home' } // Optional
