@@ -1,5 +1,5 @@
 {
-  "name": "bridgemedicine",
+  "name": "Hubs Network",
   "version": "0.0.1",
   "description": "",
   "author": "Roberto Valenti",
@@ -40,8 +40,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liminalvillage/bridgemedicine.git"
+    "url": "git+https://github.com/liminalvillage/hubs.git"
   },
-  "homepage": "https://bridgemedicine.it",
+  "homepage": "https://hubs.network",
   "license": "MIT"
 }
