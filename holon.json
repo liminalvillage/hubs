@@ -6,11 +6,11 @@
     "image": "hubs.png",
     "holons" : 
     [
-    { "id": "http://github.com/liminalvilage/local/","label":"Synergy hubs"},
-    { "id": "http://github.com/liminalvilage/local/","label":"Ratpark"},
-    { "id": "http://github.com/liminalvilage/local/","label":"Liminal Village"},
-    { "id": "http://github.com/liminalvilage/local/","label":"Asha Global"},
-    { "id": "http://github.com/liminalvilage/local/","label":"Akasha hub"}
+    { "id": "http://github.com/liminalvillage/local/","label":"Synergy hubs"},
+    { "id": "http://github.com/liminalvillage/local/","label":"Ratpark"},
+    { "id": "http://github.com/liminalvillage/local/","label":"Liminal Village"},
+    { "id": "http://github.com/liminalvillage/local/","label":"Asha Global"},
+    { "id": "http://github.com/liminalvillage/local/","label":"Akasha hub"}
     ]
 }
 
