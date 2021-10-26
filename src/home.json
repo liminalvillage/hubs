@@ -9,6 +9,7 @@
     { "id": "http://github.com/robertovalenti/worldmandala/holon", "label": "World Mandala" },
     { "id": "http://github.com/liminalvillage/hubs", "label": "Hubs Network" },
     { "id": "http://github.com/matslats/holon", "label": "Credit Commons" },
-    { "id": "http://github.com/liminalvillage/bridgemedicine/public/text/en/home", "label": "Bridge Medicine" }
+    { "id": "http://github.com/liminalvillage/bridgemedicine/public/text/en/home", "label": "Bridge Medicine" },
+    { "id": "http://github.com/robertovalenti/personal/pizza", "label": "Pizza Margherita Recipe" }
     ]
 }

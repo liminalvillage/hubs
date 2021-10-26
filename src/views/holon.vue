@@ -1,46 +1,13 @@
 <template>
-   <z-view   :style="[{backgroundImage:`url(${this.image})`},{backgroundSize: `80% 80%`},{backgroundColor: `transparent`},{backgroundRepeat: `no-repeat`},{backgroundPosition: `center`}]"
+   <z-view
       >
-      <modal name="test"> test
-        </modal>
-    <vue-final-modal
-    v-model="showModal"
-    classes="modal-container"
-    content-class="modal-content"
-    :fit-parent = "false"
-    :drag="true"
-    :z-index="true"
-   >
-      <button class="modal__close" @click="showModal = false">
-        X
-      </button>
-      <span class="modal__title">Hello, vue-final-modal</span>
-      <div class="modal__content">
-        <p v-for="i in 3" :key="i">
-          Vue Final Modal is a renderless, stackable, detachable and lightweight modal component.
-        </p>
-      </div>
-      <div class="modal__action">
-        <button highlight @click="showConfirmModal = true">confirm</button>
-        <button @click="showModal = false">cancel</button>
-      </div>
-    </vue-final-modal>
-
-    <!-- Second modal -->
-    <vue-final-modal v-model="showConfirmModal" classes="modal-container" content-class="modal-content">
-      <button class="modal__close" @click="showConfirmModal = false">
-        X
-      </button>
-      <span class="modal__title">Confirm</span>
-      <div class="modal__content">Confirm to submit.</div>
-      <div class="modal__action">
-        <v-button @click="confirm">confirm</v-button>
-        <v-button @click="showConfirmModal = false">cancel</v-button>
-      </div>
-    </vue-final-modal>
     <div slot="default" style="width:85%;margin:5%;">
       <h1>{{name}}</h1>
+       <h1>{{perspectives}}</h1>
+      <small v-if="type == 'ETHEREUM'">{{this.id}}</small>
       <br/>
+      <button v-if="type == 'ETHEREUM'" @click="sendFunds(this.id)">Send Funds</button> <br/>
+      <!-- <button v-if="type == 'ETHEREUM'" @click="sendFunds(this.id)">Purchase Product</button> -->
       <!-- <i v-if="quote">"{{quote}}"</i>
       <br/>
       <br/>
@@ -73,9 +40,10 @@
       :distance="130"
       :label-pos="index>=holons.length/2?'right':'left'"
       :to-view="editing ? '': {name:'holon', params: {id: holon.id}}"
-      :style="[{backgroundImage:`url(${holonsimages[index]})`},{backgroundSize: `80% 80%`},{backgroundRepeat: `no-repeat`},{backgroundPosition: `center`},{borderWidth:'$(holonsvalues[index])px'}]"
-      >
-      <!-- <img v-if=holonsimages[index] :src="`./images/${holonsimages[index]}`" style="width: 80%; margin-top:auto; margin-bottom:auto;"> -->
+       >
+       <!-- :style="[{backgroundImage:`url(${holonsimages[index]})`},{backgroundSize: `100% 100%`},{backgroundRepeat: `no-repeat`},{backgroundPosition: `center`},{borderWidth:'$(holonsvalues[index])px'}]"
+      -->
+      <img v-if=holonsimages[index] :src="`${holonsimages[index]}`" style="width: 100%; opacity:0.4;" onerror="this.style.display='none'"/>
        <!-- :imagePath = "holonsimages[index]?'./images/'+ holonsimages[index]:''" -->
       </z-spot>
       <!-- settings-->
@@ -99,12 +67,12 @@
         <i v-if="editing" class="fas fa-save"></i>
         <i v-else class="fas fa-edit"></i>
       </z-spot>
-      <z-spot v-if="type == 'GITHUB'"
+      <z-spot v-if="url"
         button
         :angle ="250"
         :distance ="125"
         size ="s"
-        label ="GitHub"
+        label ="Website"
         label-pos = 'top'
         @click.native ="goToSite(url)"
         >
@@ -116,7 +84,8 @@
         :distance="125"
         size="s"
         label-pos = 'top'
-        label="Comms">
+        label="Comms"
+         @click.native ="openComms">
         <i class="fas fa-video"> </i>
       </z-spot>
       <!-- ------------------------- Add Button ------------------------- -->
@@ -135,6 +104,9 @@
 </template>
 <script>
 import { VueFinalModal, ModalsContainer } from 'vue-final-modal'
+import { Ad4mClient, Link } from '@perspect3vism/ad4m'
+import { ApolloClient, InMemoryCache } from '@apollo/client'
+import { WebSocketLink } from '@apollo/client/link/ws'
 
 import VueMarkdown from 'vue-markdown'
 import Home from '../home.json'
@@ -157,9 +129,26 @@ export default {
   components: {
     VueMarkdown,
     VueFinalModal,
-    ModalsContainer
+    ModalsContainer,
+    Ad4mClient
   },
   methods: {
+    openComms () {
+      console.log('emitting ' + this.id)
+      this.$emit('opencomms', this.id)
+    },
+    sendFunds (address, amount) {
+      console.log(address)
+      console.log(amount)
+      // web3.eth.sendTransaction({from:web3.defaultAccount ,to:address, value:web3.utils.toWei(amount, "ether")})
+      // this.closeAddAppreciationModal()
+    },
+    sendERC20 (tokenaddress, address, amount) {
+      console.log(address)
+      console.log(amount)
+      // web3.eth.sendTransaction({from:web3.defaultAccount ,to:address, value:web3.utils.toWei(amount, "ether")})
+      // this.closeAddAppreciationModal()
+    },
     confirm () {
       this.showConfirmModal = false
       this.showModal = false
@@ -175,6 +164,25 @@ export default {
     async initWeb3 () {
       this.web3 = new Web3(new Web3.providers.WebsocketProvider('wss://ropsten.infura.io/ws/v3/966b62ed84c84715bc5970a1afecad29'))
       // this.web3.eth.getAccounts(console.log)
+    },
+    async getPerspectives () {
+      const uri = 'ws://localhost:4000/graphql'
+      const apolloClient = new ApolloClient({
+        link: new WebSocketLink({
+          uri,
+          options: { reconnect: true }
+        }),
+        cache: new InMemoryCache({ resultCaching: false, addTypename: false }),
+        defaultOptions: {
+          watchQuery: { fetchPolicy: 'no-cache' },
+          query: { fetchPolicy: 'no-cache' }
+        }
+      })
+      var ad4mClient = new Ad4mClient(apolloClient)
+
+      this.perspectives = await ad4mClient.perspective.all()
+      await this.perspectives[0].add(new Link({ source: 'test', target: 'Qmd6AZzLjfGWNAqWLGTGy354JC1bK26XNf7rTEEsJfv7Fe://QmXA9hca9NKoJ8dZJR5dtHpPsWVm66qbE4jmZ6x6vyEQsL' }))
+      console.log(this.perspectives[0].uuid)
     },
     async fetchContributors (id) {
       // fetch(id, {
@@ -349,6 +357,7 @@ export default {
       }
       let r = await this.fetchInfo(this.id)
       console.log(r.type)
+      this.type = r.type
       if (r.type === 'ETHEREUM') this.$router.push({ path: `/${this.id}` })
       var json = r.json
       if (json) {
@@ -386,6 +395,19 @@ export default {
           ).then((values) => {
             this.holonsimages = values
           })
+          // fetch images of each sub-holon
+          // Promise.all(
+          //   this.holons.map(async (holon, index) => {
+          //     if (holon.image) {
+          //       return holon.image
+          //     } else {
+          //       let r = await this.fetchInfo(holon.id)
+          //       return r.json.image
+          //     }
+          //   })
+          // ).then((values) => {
+          //   this.holonsimages = values
+          // })
           // fetch subholon values if available
           for (let i = 0; i < this.holons.length; i++) {
             this.holonsvalues[i] = parseInt(this.holons[i].value)
@@ -422,8 +444,10 @@ export default {
     }
   },
   mounted () {
+    this.$modal.show('test')
     this.holonInfo()
     this.initWeb3()
+    this.getPerspectives()
     // this.holon = new Web3.eth.Contract(data.holonabi, data.holonaddress)
   },
   computed: {
@@ -453,7 +477,8 @@ export default {
       holons: [],
       holonslabels: [],
       holonsimages: [],
-      holonsvalues: []
+      holonsvalues: [],
+      perspectives: []
     }
   }
 }
@@ -468,12 +493,12 @@ export default {
   background: radial-gradient(40% 40% at 50% 50%,hsla(0,0%,100%,.1) 0,rgba(0,0,0,.1) 100%)
 }
 
-::v-deep .modal-container {
+.modal-container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-::v-deep .modal-content {
+.modal-content {
   position: relative;
   display: flex;
   flex-direction: column;
