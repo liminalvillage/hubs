@@ -10,6 +10,7 @@
     { "id": "http://github.com/liminalvillage/hubs", "label": "Hubs Network" },
     { "id": "http://github.com/matslats/holon", "label": "Credit Commons" },
     { "id": "http://github.com/liminalvillage/bridgemedicine/public/text/en/home", "label": "Bridge Medicine" },
-    { "id": "http://github.com/robertovalenti/personal/pizza", "label": "Pizza Margherita Recipe" }
+    { "id": "http://github.com/robertovalenti/personal/pizza", "label": "Pizza Margherita Recipe" },
+    { "id": "http://mobilizon.it/relay", "label": "Mobilizon (Fediverse)" }
     ]
 }

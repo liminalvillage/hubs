@@ -3,7 +3,6 @@
       >
     <div slot="default" style="width:85%;margin:5%;">
       <h1>{{name}}</h1>
-       <h1>{{perspectives}}</h1>
       <small v-if="type == 'ETHEREUM'">{{this.id}}</small>
       <br/>
       <button v-if="type == 'ETHEREUM'" @click="sendFunds(this.id)">Send Funds</button> <br/>
@@ -104,14 +103,11 @@
 </template>
 <script>
 import { VueFinalModal, ModalsContainer } from 'vue-final-modal'
-import { Ad4mClient, Link } from '@perspect3vism/ad4m'
-import { ApolloClient, InMemoryCache } from '@apollo/client'
-import { WebSocketLink } from '@apollo/client/link/ws'
-
 import VueMarkdown from 'vue-markdown'
 import Home from '../home.json'
 // import web3 from '../libs/web3.js'
 import Web3 from 'web3'
+import * as adapters from '../libs/adapters.js'
 // import abi from '../abi.json'
 import * as contractdata from '../ContractData.json'
 export default {
@@ -129,8 +125,7 @@ export default {
   components: {
     VueMarkdown,
     VueFinalModal,
-    ModalsContainer,
-    Ad4mClient
+    ModalsContainer
   },
   methods: {
     openComms () {
@@ -165,82 +160,6 @@ export default {
       this.web3 = new Web3(new Web3.providers.WebsocketProvider('wss://ropsten.infura.io/ws/v3/966b62ed84c84715bc5970a1afecad29'))
       // this.web3.eth.getAccounts(console.log)
     },
-    async getPerspectives () {
-      const uri = 'ws://localhost:4000/graphql'
-      const apolloClient = new ApolloClient({
-        link: new WebSocketLink({
-          uri,
-          options: { reconnect: true }
-        }),
-        cache: new InMemoryCache({ resultCaching: false, addTypename: false }),
-        defaultOptions: {
-          watchQuery: { fetchPolicy: 'no-cache' },
-          query: { fetchPolicy: 'no-cache' }
-        }
-      })
-      var ad4mClient = new Ad4mClient(apolloClient)
-
-      this.perspectives = await ad4mClient.perspective.all()
-      await this.perspectives[0].add(new Link({ source: 'test', target: 'Qmd6AZzLjfGWNAqWLGTGy354JC1bK26XNf7rTEEsJfv7Fe://QmXA9hca9NKoJ8dZJR5dtHpPsWVm66qbE4jmZ6x6vyEQsL' }))
-      console.log(this.perspectives[0].uuid)
-    },
-    async fetchContributors (id) {
-      // fetch(id, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'text/plain',
-      //     'Accept': 'application/vnd.github.v3+json'
-      //   }
-      // })
-      //   .then(response => response.json()) // Converting the response to a JSON object
-      //   .then(data => document.body.append())
-      //   .catch(error => console.error(error))
-
-      var r = await fetch(id, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'text/plain',
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      })
-      console.log('Found contributors: ' + r.json())
-      return r.json()
-    },
-    async fetchProjectInfo (address) {
-    // assemble info from package / npm
-    },
-    async fetchEthInfo (address) { // compiles a compatible JSON from blockchain information at address
-      var json = {}
-      this.web3 = new Web3(new Web3.providers.WebsocketProvider('wss://ropsten.infura.io/ws/v3/966b62ed84c84715bc5970a1afecad29'))
-      // check if it is an holon
-      const code = await this.web3.eth.getCode(address)
-      if (code === '0x') {
-        console.log(address + 'is NOT an holon')
-        json.id = address
-        json.name = address // check ens
-        json.description = address
-        // json.image = 'https://ipfs.3box.io/profile?address=' + address // check 3box
-      } else {
-        let holon = new this.web3.eth.Contract(contractdata.abi, address)
-        // const totalappreciation = await holon.methods.totalappreciation().call()
-        // console.log(totalappreciation)
-        // var name = holon.methods.toName(address).call()
-        // console.log(name)
-        json.id = address
-        json.name = await holon.methods.name().call()
-        var members = await holon.methods.listMembers().call()
-        if (members) {
-          json.holons = members.map((member, index) => {
-            var name = holon.methods.toName(member).call()
-            return { 'id': member, 'label': name }
-          })
-        }
-      }
-      return json
-      // check if it is a holon from ethereum
-      // check if it is a dao from the graph
-      // compile jsos
-    },
     async fetchInfo (address) { // returns json containing info of the holon passedd in
       console.log('Requesting: ' + address)
       var type = 'N/A'
@@ -266,7 +185,7 @@ export default {
           return { json, type }
         }
       }
-      // ===================================
+      // =================================== ADAPTERS
       if (address.includes('github.com')) { // GITHUB ADDRESS
         type = 'GITHUB'
         url = new URL(address)
@@ -284,20 +203,27 @@ export default {
         base = 'https://gitlab.com/' + pathArray[1] + '/' + pathArray[2] + '/-/raw/master/'
         file = url.pathname.slice(url.pathname.indexOf(pathArray[2]) + pathArray[2].length + 1)
         fetchaddress = base + file
-      } else if (address.startsWith('http')) { // WEB ADDRESS
-        type = 'WEB'
-        if (!address.endsWith('.json')) address += '/murmurations.json'
-        fetchaddress = 'https://api.allorigins.win/get?url=' + address
+      } else if (address.includes('relay')) { // ETHEREUM ADDRESS
+        type = 'FEDIVERSE'
+        json = await adapters.fetchFediverseInfo(address)
+        return { json, type }
+      // } else if (address.startsWith('"')) { // WEB ADDRESS
+      //   type = 'WEBLINK'
+      //   fetchaddress = 'https://api.allorigins.win/get?url=' + address
+      // } else if (address.startsWith('http')) { // WEB ADDRESS
+      //   type = 'WEB'
+      //   if (!address.endsWith('.json')) address += '/murmurations.json'
+      //   fetchaddress = 'https://api.allorigins.win/get?url=' + address
       } else if (address.startsWith('0x')) { // ETHEREUM ADDRESS
         type = 'ETHEREUM'
-        json = await this.fetchEthInfo(address)
+        json = await adapters.fetchEthInfo(address)
         return { json, type }
         // var contract = new web3.eth.Contract(abi, '0x6B175474E89094C44Da98b954EedeAC495271d0F')
         // contract.methods.balanceOf('0x96bB7B429cF97131E624Fa32d27B45595d59b5B8').call().then(console.log)
         // (query ethereum and the graph)
-      } else if (address.match(/[0-9A-Fa-f]{47}/g)) { //  IPFS ADDRESS
-        type = 'IPFS'
-        fetchaddress = 'https://ipfs.io/ipfs/' + address
+      // } else if (address.match(/[0-9A-Fa-f]{47}/g)) { //  IPFS ADDRESS
+      //   type = 'IPFS'
+      //   fetchaddress = 'https://ipfs.io/ipfs/' + address
       } else if (address.startsWith('./') || address.startsWith('/') || address.match(/[0-9A-Za-z]/)) { // RELATIVE ADDRESS
         type = 'RELATIVE'
         pathArray = this.$route.path.split('/') // source absolute path info from route
@@ -308,15 +234,16 @@ export default {
       // } else if (address) { // NPM NAME
       //   // fetchaddress = 'https://registry.npmjs.org/' + address
       //   fetchaddress = base + address // temporary
-      } else { // not know what to do, assume fetched from github
+      } else { // not know what to do, just load it
         type = 'NONE'
-        base = 'https://raw.githubusercontent.com/' + this.$route.params.org + '/' + this.$route.params.repo + '/master/'
-        file = this.$route.params.file
-        fetchaddress = base + file
+        // base = 'https://raw.githubusercontent.com/' + this.$route.params.org + '/' + this.$route.params.repo + '/master/'
+        // file = this.$route.params.file
+        fetchaddress = address
       }
+      // ====================================================================
       if (!fetchaddress) return { json, type }
       if (fetchaddress.endsWith('/')) { fetchaddress += 'holon.json' }
-      if (!fetchaddress.endsWith('.json')) { fetchaddress += '.json' }
+      if (!fetchaddress.endsWith('.json') && type !== 'NONE') { fetchaddress += '.json' }
       console.log('Fetching: ' + fetchaddress + ' - ' + type)
       var r = await fetch(fetchaddress)
       if (r.ok) {
