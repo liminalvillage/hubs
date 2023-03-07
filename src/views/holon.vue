@@ -3,7 +3,6 @@
       >
     <div slot="default" style="width:85%;margin:5%;">
       <h1>{{name}}</h1>
-       <h1>{{perspectives}}</h1>
       <small v-if="type == 'ETHEREUM'">{{this.id}}</small>
       <br/>
       <button v-if="type == 'ETHEREUM'" @click="sendFunds(this.id)">Send Funds</button> <br/>
@@ -103,10 +102,6 @@
   </z-view>
 </template>
 <script>
-import { VueFinalModal, ModalsContainer } from 'vue-final-modal'
-import { Ad4mClient, Link } from '@perspect3vism/ad4m'
-import { ApolloClient, InMemoryCache } from '@apollo/client'
-import { WebSocketLink } from '@apollo/client/link/ws'
 
 import VueMarkdown from 'vue-markdown'
 import Home from '../home.json'
@@ -127,10 +122,7 @@ export default {
     }
   },
   components: {
-    VueMarkdown,
-    VueFinalModal,
-    ModalsContainer,
-    Ad4mClient
+    VueMarkdown
   },
   methods: {
     openComms () {
@@ -165,25 +157,25 @@ export default {
       this.web3 = new Web3(new Web3.providers.WebsocketProvider('wss://ropsten.infura.io/ws/v3/966b62ed84c84715bc5970a1afecad29'))
       // this.web3.eth.getAccounts(console.log)
     },
-    async getPerspectives () {
-      const uri = 'ws://localhost:4000/graphql'
-      const apolloClient = new ApolloClient({
-        link: new WebSocketLink({
-          uri,
-          options: { reconnect: true }
-        }),
-        cache: new InMemoryCache({ resultCaching: false, addTypename: false }),
-        defaultOptions: {
-          watchQuery: { fetchPolicy: 'no-cache' },
-          query: { fetchPolicy: 'no-cache' }
-        }
-      })
-      var ad4mClient = new Ad4mClient(apolloClient)
+    // async getPerspectives () {
+    //   const uri = 'ws://localhost:4000/graphql'
+    //   const apolloClient = new ApolloClient({
+    //     link: new WebSocketLink({
+    //       uri,
+    //       options: { reconnect: true }
+    //     }),
+    //     cache: new InMemoryCache({ resultCaching: false, addTypename: false }),
+    //     defaultOptions: {
+    //       watchQuery: { fetchPolicy: 'no-cache' },
+    //       query: { fetchPolicy: 'no-cache' }
+    //     }
+    //   })
+    //   var ad4mClient = new Ad4mClient(apolloClient)
 
-      this.perspectives = await ad4mClient.perspective.all()
-      await this.perspectives[0].add(new Link({ source: 'test', target: 'Qmd6AZzLjfGWNAqWLGTGy354JC1bK26XNf7rTEEsJfv7Fe://QmXA9hca9NKoJ8dZJR5dtHpPsWVm66qbE4jmZ6x6vyEQsL' }))
-      console.log(this.perspectives[0].uuid)
-    },
+    //   this.perspectives = await ad4mClient.perspective.all()
+    //   await this.perspectives[0].add(new Link({ source: 'test', target: 'Qmd6AZzLjfGWNAqWLGTGy354JC1bK26XNf7rTEEsJfv7Fe://QmXA9hca9NKoJ8dZJR5dtHpPsWVm66qbE4jmZ6x6vyEQsL' }))
+    //   console.log(this.perspectives[0].uuid)
+    // },
     async fetchContributors (id) {
       // fetch(id, {
       //   method: 'POST',
@@ -444,10 +436,8 @@ export default {
     }
   },
   mounted () {
-    this.$modal.show('test')
     this.holonInfo()
     this.initWeb3()
-    this.getPerspectives()
     // this.holon = new Web3.eth.Contract(data.holonabi, data.holonaddress)
   },
   computed: {
