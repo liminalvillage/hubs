@@ -54,7 +54,7 @@ export default {
     this.$zircle.config({
       mode: 'mixed',
       style: {
-        theme: 'black',
+        theme: 'gray',
         mode: 'dark'
       },
       debug: true

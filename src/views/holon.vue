@@ -1,17 +1,18 @@
 <template>
-   <z-view
-      >
-    <div slot="default" style="width:85%;margin:5%;">
+   <z-view  :style="[{backgroundImage:`url(${this.image})`},{backgroundSize: `100% 100%`},{backgroundRepeat: `no-repeat`},{backgroundPosition: `center`}]"
+       >
+      
       <h1>{{name}}</h1>
       <small v-if="type == 'ETHEREUM'">{{this.id}}</small>
       <br/>
       <button v-if="type == 'ETHEREUM'" @click="sendFunds(this.id)">Send Funds</button> <br/>
+      <img v-if=holonsimages[index] :src="`${holonsimages[index]}`" style="width: 100%; opacity:0.4;" onerror="this.style.display='none'"/>
       <!-- <button v-if="type == 'ETHEREUM'" @click="sendFunds(this.id)">Purchase Product</button> -->
       <!-- <i v-if="quote">"{{quote}}"</i>
       <br/>
       <br/>
       <i><b>{{quoteauthor}}</b></i> -->
-    </div>
+   
     <div slot="default" style="width:85%;margin:5%;"> <vue-markdown :source="this.description"></vue-markdown></div>
     <div slot="extension">
       <z-spot v-if="type == 'PROJECT'"
@@ -35,15 +36,14 @@
       :label="holonslabels[index]"
       :progress="parseInt(holon.value)"
       :angle=" 200 - (index * (220./(holons.length >1 ? holons.length - 1 : 1)))"
-      size="m"
-      :distance="130"
+      size="l"
+      :distance="140"
       :label-pos="index>=holons.length/2?'right':'left'"
       :to-view="editing ? '': {name:'holon', params: {id: holon.id}}"
-       >
-       <!-- :style="[{backgroundImage:`url(${holonsimages[index]})`},{backgroundSize: `100% 100%`},{backgroundRepeat: `no-repeat`},{backgroundPosition: `center`},{borderWidth:'$(holonsvalues[index])px'}]"
+       :style="[{backgroundImage:`url(${holonsimages[index]})`},{backgroundSize: `100% 100%`},{backgroundRepeat: `no-repeat`},{backgroundPosition: `center`},{borderWidth:'$(holonsvalues[index])px'}]"
+      >
+      <!-- <img v-if=holonsimages[index] :src="`${holonsimages[index]}`" style="width: 100%; opacity:0.4;" onerror="this.style.display='none'"/>
       -->
-      <img v-if=holonsimages[index] :src="`${holonsimages[index]}`" style="width: 100%; opacity:0.4;" onerror="this.style.display='none'"/>
-       <!-- :imagePath = "holonsimages[index]?'./images/'+ holonsimages[index]:''" -->
       </z-spot>
       <!-- settings-->
       <!-- <z-spot
@@ -55,7 +55,7 @@
         <i class="fas fa-sliders-h"></i>
       </z-spot> -->
       <!-- Edit signals -->
-       <z-spot
+       <!-- <z-spot
         button
         :angle ="270"
         :distance ="125"
@@ -65,7 +65,18 @@
         @click.native="editing ? editing = false : editing = true">
         <i v-if="editing" class="fas fa-save"></i>
         <i v-else class="fas fa-edit"></i>
-      </z-spot>
+      </z-spot> -->
+
+      <z-spot
+        button
+        :angle ="270"
+        :distance ="125"
+        size ="s"
+        label ="Purchase"
+        label-pos = 'top'
+        @click.native=purchase()>
+        <i class="fas fa-dollar-sign"></i>
+      </z-spot> 
       <z-spot v-if="url"
         button
         :angle ="250"
@@ -83,9 +94,11 @@
         :distance="125"
         size="s"
         label-pos = 'top'
-        label="Comms"
-         @click.native ="openComms">
-        <i class="fas fa-video"> </i>
+        label="Origin"
+         @click.native ="openComms"
+         :to-view="editing ? '': {name:'holon', params: {id: origin}}"
+         >
+        <i class="fas fa-backward"> </i>
       </z-spot>
       <!-- ------------------------- Add Button ------------------------- -->
       <z-spot
@@ -94,7 +107,7 @@
         :distance="100"
         size="s"
         label-pos = 'top'
-        label="Add"
+        label="Fork"
         @click.native="add()">
         <i class="fas fa-plus"> </i>
       </z-spot>
@@ -289,6 +302,7 @@ export default {
       var json = r.json
       if (json) {
         this.name = json.name
+        this.origin = json.origin
         this.description = json.description ? json.description : json.text
         this.url = json.url
         this.quote = json.quote
@@ -323,19 +337,19 @@ export default {
             this.holonsimages = values
           })
           // fetch images of each sub-holon
-          // Promise.all(
-          //   this.holons.map(async (holon, index) => {
-          //     if (holon.image) {
-          //       return holon.image
-          //     } else {
-          //       let r = await this.fetchInfo(holon.id)
-          //       return r.json.image
-          //     }
-          //   })
-          // ).then((values) => {
-          //   this.holonsimages = values
-          // })
-          // fetch subholon values if available
+          Promise.all(
+            this.holons.map(async (holon, index) => {
+              if (holon.image) {
+                return holon.image
+              } else {
+                let r = await this.fetchInfo(holon.id)
+                return r.json.image
+              }
+            })
+          ).then((values) => {
+            this.holonsimages = values
+          })
+          //fetch subholon values if available
           for (let i = 0; i < this.holons.length; i++) {
             this.holonsvalues[i] = parseInt(this.holons[i].value)
           }
@@ -374,7 +388,6 @@ export default {
     this.$modal.show('test')
     this.holonInfo()
     this.initWeb3()
-    this.getPerspectives()
     // this.holon = new Web3.eth.Contract(data.holonabi, data.holonaddress)
   },
   computed: {
@@ -397,6 +410,7 @@ export default {
       type: 'GITHUB',
       id: '',
       name: '',
+      origin:'',
       description: '',
       quote: '',
       quoteauthor: '',
@@ -404,8 +418,7 @@ export default {
       holons: [],
       holonslabels: [],
       holonsimages: [],
-      holonsvalues: [],
-      perspectives: []
+      holonsvalues: []
     }
   }
 }
